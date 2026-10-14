@@ -17,8 +17,9 @@ data/nodes/                       Optional node-specific data
 
 ## Node configuration
 
-The default node definition includes `linux_baseline` on every node in the
-environment. The node with certname
+The top-level `include linux_baseline` in `manifests/site.pp` applies the
+baseline to every node whose catalog is compiled from this environment. The
+node with certname
 `puppet-client1.ap-south-1.compute.internal` also includes `webserver`. Update
 the node name in `manifests/site.pp` if the agent reports a different certname.
 

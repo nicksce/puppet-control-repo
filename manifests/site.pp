@@ -1,10 +1,8 @@
-# Global configuration applied to every node in this environment.
-node default {
-  include linux_baseline
-}
+# Common classes are declared outside node definitions, so every node using
+# this environment receives the baseline.
+include linux_baseline
 
-# The single client in this learning environment gets the baseline globally,
-# plus the example web server.
+# Node-specific classes belong in matching node definitions.
 node 'puppet-client1.ap-south-1.compute.internal' {
   include webserver
 }
