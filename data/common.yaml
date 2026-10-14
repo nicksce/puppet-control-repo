@@ -1,0 +1,10 @@
+---
+# Rocky Linux 9 packages installed on every node by linux_baseline.
+linux_baseline::packages:
+  - curl
+  - vim-enhanced
+  - git
+  - wget
+  - chrony
+  - firewalld
+  - policycoreutils-python-utils
