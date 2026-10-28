@@ -1,8 +1,15 @@
 # Puppet control repository
 
-This repository is a learning-project Puppet control repo deployed to Puppet
-Server with r10k. It provides a global Rocky Linux 9 baseline and configures
-one client with an Apache web server.
+This is a public, experimental Puppet control repository for an infrastructure
+learning project. It is intended to be deployed with r10k to the Puppet Server
+created by the [Terraform Puppet lab](https://github.com/nicksce/cloud-engineering-lab/tree/main/puppet).
+It provides a Rocky Linux 9 baseline and configures one client with an Apache
+web server.
+
+> **Experimental use only. Do not use this configuration on production
+> systems.** The baseline grants the `nikunj` account passwordless full sudo
+> privileges and installs and configures packages and services. Review and
+> adapt all manifests and data before using them outside an isolated lab.
 
 ## Repository layout
 
@@ -59,11 +66,18 @@ linux_baseline::packages:
 
 The override replaces the global array value for that class parameter.
 
-## Deploy with r10k
+## Use with the Terraform Puppet lab
 
-Configure r10k's `basedir` to point to Puppet Server's environments directory,
-commonly `/etc/puppetlabs/code/environments`, and configure the control-repo
-source to this Git repository. r10k deploys each Git branch as an environment;
-for example, deploying the `production` branch makes this code available in
-the `production` environment. Keep the r10k `basedir` and Puppet Server's
-environment path aligned.
+1. Use the [Terraform Puppet lab](https://github.com/nicksce/cloud-engineering-lab/tree/main/puppet)
+   to create the Puppet Server for the learning environment.
+2. Configure that server's r10k control-repo source to this repository.
+3. Set r10k's `basedir` to the Puppet Server environments directory, commonly
+   `/etc/puppetlabs/code/environments`, and ensure it matches Puppet Server's
+   environment path.
+4. Deploy the desired Git branch with r10k. r10k deploys each branch as an
+   environment; for example, the `production` branch is deployed as the
+   `production` environment. The branch name and the environment requested by
+   the agents must match your r10k setup.
+
+The Terraform project creates the Puppet Server infrastructure; r10k deploys
+this control repository's Puppet code to that server.
