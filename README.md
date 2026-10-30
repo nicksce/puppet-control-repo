@@ -150,6 +150,128 @@ The override replaces the global array value for that class parameter.
 The Terraform project creates the Puppet Server infrastructure; r10k deploys
 this control repository's Puppet code to that server.
 
+## Puppet client troubleshooting and logs
+
+Run these commands on the Rocky Linux client. The Puppet binary installed by
+Puppet Labs packages is `/opt/puppetlabs/bin/puppet`.
+
+Check whether the agent service is running:
+
+```bash
+sudo systemctl status puppet
+```
+
+View recent service logs or follow new messages in the system journal:
+
+```bash
+sudo journalctl -u puppet --since "1 hour ago" --no-pager
+sudo journalctl -u puppet -f
+```
+
+On Linux, the agent service normally sends messages to syslog; this project
+stores them in `/var/log/messages` through rsyslog:
+
+```bash
+sudo grep -i puppet /var/log/messages | tail -n 100
+sudo tail -f /var/log/messages
+```
+
+Check the agent's server, certificate name, and requested environment:
+
+```bash
+sudo /opt/puppetlabs/bin/puppet config print server
+sudo /opt/puppetlabs/bin/puppet config print certname
+sudo /opt/puppetlabs/bin/puppet config print environment
+```
+
+Run a dry-run catalog application in the foreground. It prints detailed
+output without applying changes:
+
+```bash
+sudo /opt/puppetlabs/bin/puppet agent --test --noop
+```
+
+After reviewing the dry-run output, apply the catalog with:
+
+```bash
+sudo /opt/puppetlabs/bin/puppet agent --test
+```
+
+The foreground run's messages appear in the terminal. For deeper diagnostics,
+add `--debug` to the command and review the output before sharing it, since
+debug logs can contain system details.
+
+## Puppet Server troubleshooting, monitoring, and logs
+
+Run these commands on the Puppet Server:
+
+Check the service and recent systemd messages:
+
+```bash
+sudo systemctl status puppetserver
+sudo journalctl -u puppetserver --since "1 hour ago" --no-pager
+sudo journalctl -u puppetserver -f
+```
+
+Puppet Server writes its main log to
+`/var/log/puppetlabs/puppetserver/puppetserver.log` by default. Follow the
+main or HTTP access log with:
+
+```bash
+sudo tail -n 100 /var/log/puppetlabs/puppetserver/puppetserver.log
+sudo tail -f /var/log/puppetlabs/puppetserver/puppetserver.log
+sudo tail -f /var/log/puppetlabs/puppetserver/puppetserver-access.log
+```
+
+Check that Puppet Server is listening on its default agent port, `8140`, and
+inspect basic system resource usage:
+
+```bash
+sudo ss -lntp | grep ':8140'
+free -h
+df -h /var/log /opt
+ps -eo pid,pcpu,pmem,rss,cmd | grep '[p]uppetserver'
+```
+
+The simple status endpoint is useful for a quick health check and returns
+`running` when Puppet Server is healthy:
+
+```bash
+PUPPET_CERTNAME="$(sudo /opt/puppetlabs/bin/puppet config print certname)"
+curl --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem \
+  "https://${PUPPET_CERTNAME}:8140/status/v1/simple"
+```
+
+For detailed service status and metrics, use the server's Puppet certificate
+and private key. The status services endpoint requires an authenticated
+client:
+
+```bash
+PUPPET_CERTNAME="$(sudo /opt/puppetlabs/bin/puppet config print certname)"
+PUPPET_SSL_DIR="/etc/puppetlabs/puppet/ssl"
+
+sudo curl --cacert "${PUPPET_SSL_DIR}/certs/ca.pem" \
+  --cert "${PUPPET_SSL_DIR}/certs/${PUPPET_CERTNAME}.pem" \
+  --key "${PUPPET_SSL_DIR}/private_keys/${PUPPET_CERTNAME}.pem" \
+  "https://${PUPPET_CERTNAME}:8140/status/v1/services?level=critical"
+
+sudo curl --cacert "${PUPPET_SSL_DIR}/certs/ca.pem" \
+  --cert "${PUPPET_SSL_DIR}/certs/${PUPPET_CERTNAME}.pem" \
+  --key "${PUPPET_SSL_DIR}/private_keys/${PUPPET_CERTNAME}.pem" \
+  "https://${PUPPET_CERTNAME}:8140/metrics/v2/list"
+```
+
+To check for client certificate requests waiting for approval:
+
+```bash
+sudo /opt/puppetlabs/bin/puppetserver ca list --all
+```
+
+See Puppet's [Puppet Server status API](https://help.puppet.com/core/current/Content/PuppetCore/server/http_api/status-api/v1/services.htm),
+[metrics API](https://help.puppet.com/core/current/content/puppetcore/server/http_api/metrics-api/v2/metrics_api.htm),
+and [logging configuration](https://help.puppet.com/core/current/content/puppetcore/server/config_file_puppetserver.htm)
+documentation for more detail.
+
 ## Pair programming
 
 This project is maintained through pair programming with OpenAI Codex. To learn
