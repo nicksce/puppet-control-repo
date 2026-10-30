@@ -290,3 +290,6 @@ documentation for more detail.
 This project is maintained through pair programming with OpenAI Codex. To learn
 how to set up OpenAI Codex with Visual Studio Code, follow the
 [Codex pair programming guide](https://nikunjmaster.org/technology/codex-pair-programming).
+
+For an introduction to Puppet and configuration management, see the
+[Puppet configuration management article](https://nikunjmaster.org/technology/puppet-configuration-management).
