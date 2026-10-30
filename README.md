@@ -197,6 +197,19 @@ After reviewing the dry-run output, apply the catalog with:
 sudo /opt/puppetlabs/bin/puppet agent --test
 ```
 
+The Puppet agent service defaults to refreshing its catalog every 30 minutes.
+Set a different interval in the agent configuration and restart the service;
+for example, to refresh hourly:
+
+```bash
+sudo /opt/puppetlabs/bin/puppet config set runinterval 1h --section agent
+sudo systemctl restart puppet
+sudo /opt/puppetlabs/bin/puppet config print runinterval --section agent
+```
+
+Intervals can be specified in seconds, minutes, hours, or days, such as `30m`,
+`1h`, or `2d`.
+
 The foreground run's messages appear in the terminal. For deeper diagnostics,
 add `--debug` to the command and review the output before sharing it, since
 debug logs can contain system details.
