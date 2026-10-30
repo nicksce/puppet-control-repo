@@ -8,3 +8,10 @@ linux_baseline::packages:
   - chrony
   - firewalld
   - policycoreutils-python-utils
+  - audit
+  - libselinux-utils
+  - policycoreutils
+  - selinux-policy-targeted
+  - rsyslog
+  - openssh-server
+  - logrotate
